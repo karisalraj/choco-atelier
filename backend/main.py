@@ -1,8 +1,6 @@
-
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal
-
 import jwt
 from fastapi import (
     FastAPI,
@@ -18,8 +16,12 @@ from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
 from models import Order, Admin
+from pathlib import Path
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 # --------------------------------------------------
 # DATABASE
 # --------------------------------------------------
@@ -182,9 +184,12 @@ class AdminLogin(BaseModel):
 
 @app.get("/")
 def home():
+    if FRONTEND_DIST.exists():
+        return FileResponse(FRONTEND_DIST / "index.html")
+
     return {
         "message": "Welcome to Choco Atelier API",
-        "status": "running",
+        "status": "running"
     }
 
 
@@ -372,3 +377,25 @@ def update_order_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to update order status",
         )
+        
+        # --------------------------------------------------
+# SERVE REACT FRONTEND
+# --------------------------------------------------
+
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=FRONTEND_DIST / "assets"),
+        name="assets",
+    )
+
+    @app.get("/{full_path:path}")
+    def serve_react_app(full_path: str):
+        requested_file = FRONTEND_DIST / full_path
+
+        if requested_file.is_file():
+            return FileResponse(requested_file)
+
+        return FileResponse(FRONTEND_DIST / "index.html")
