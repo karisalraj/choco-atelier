@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import "./AdminOrders.css";
 
-const API_URL = "http://127.0.0.1:8000/api/orderhttps://choco-atelier.onrender.coms";
+const API_URL = "https://choco-atelier.onrender.com/api/orders";
 
 const ORDER_STATUSES = [
   "pending",
@@ -19,7 +19,9 @@ function formatCurrency(amount) {
 }
 
 function formatDate(dateValue) {
-  if (!dateValue) return "Date unavailable";
+  if (!dateValue) {
+    return "Date unavailable";
+  }
 
   const date = new Date(dateValue);
 
@@ -31,7 +33,9 @@ function formatDate(dateValue) {
 }
 
 function formatStatus(status) {
-  if (!status) return "Pending";
+  if (!status) {
+    return "Pending";
+  }
 
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
@@ -45,9 +49,17 @@ function AdminOrders() {
   const [selectedStatuses, setSelectedStatuses] = useState({});
   const [updatingOrders, setUpdatingOrders] = useState({});
 
+  // --------------------------------------------------
+  // GET ADMIN TOKEN
+  // --------------------------------------------------
+
   const getToken = () => {
     return localStorage.getItem("choco_admin_token");
   };
+
+  // --------------------------------------------------
+  // LOGOUT
+  // --------------------------------------------------
 
   const logoutAdmin = () => {
     localStorage.removeItem("choco_admin_token");
@@ -55,6 +67,10 @@ function AdminOrders() {
 
     window.location.replace("/admin/login");
   };
+
+  // --------------------------------------------------
+  // FETCH ORDERS
+  // --------------------------------------------------
 
   const fetchOrders = useCallback(async (isRefresh = false) => {
     const token = getToken();
@@ -81,6 +97,10 @@ function AdminOrders() {
         },
       });
 
+      // --------------------------------------------------
+      // TOKEN EXPIRED / INVALID
+      // --------------------------------------------------
+
       if (response.status === 401) {
         logoutAdmin();
         return;
@@ -105,7 +125,8 @@ function AdminOrders() {
       const statusValues = {};
 
       data.forEach((order) => {
-        statusValues[order.id] = order.status || "pending";
+        statusValues[order.id] =
+          order.status || "pending";
       });
 
       setSelectedStatuses(statusValues);
@@ -120,9 +141,17 @@ function AdminOrders() {
     }
   }, []);
 
+  // --------------------------------------------------
+  // LOAD ORDERS WHEN PAGE OPENS
+  // --------------------------------------------------
+
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // --------------------------------------------------
+  // CHANGE STATUS IN DROPDOWN
+  // --------------------------------------------------
 
   const handleStatusChange = (orderId, nextStatus) => {
     setSelectedStatuses((currentStatuses) => ({
@@ -130,6 +159,10 @@ function AdminOrders() {
       [orderId]: nextStatus,
     }));
   };
+
+  // --------------------------------------------------
+  // UPDATE ORDER STATUS
+  // --------------------------------------------------
 
   const handleUpdateStatus = async (orderId) => {
     const token = getToken();
@@ -169,6 +202,10 @@ function AdminOrders() {
         }
       );
 
+      // --------------------------------------------------
+      // TOKEN EXPIRED / INVALID
+      // --------------------------------------------------
+
       if (response.status === 401) {
         logoutAdmin();
         return;
@@ -182,6 +219,10 @@ function AdminOrders() {
             "Unable to update order status."
         );
       }
+
+      // --------------------------------------------------
+      // UPDATE ORDER IN UI
+      // --------------------------------------------------
 
       setOrders((currentOrders) =>
         currentOrders.map((order) =>
@@ -215,6 +256,10 @@ function AdminOrders() {
     }
   };
 
+  // --------------------------------------------------
+  // SUMMARY CALCULATIONS
+  // --------------------------------------------------
+
   const pendingOrders = orders.filter(
     (order) =>
       order.status?.toLowerCase() === "pending"
@@ -230,6 +275,10 @@ function AdminOrders() {
       total + (Number(order.subtotal) || 0),
     0
   );
+
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
 
   return (
     <main className="admin-orders">
@@ -247,15 +296,20 @@ function AdminOrders() {
         </div>
 
         <div className="admin-orders__header-actions">
-           <button
-    className="admin-orders__store"
-    type="button"
-    onClick={() => {
-      window.location.href = "/";
-    }}
-  >
-    Back to Store
-  </button>
+          {/* BACK TO STORE */}
+
+          <button
+            className="admin-orders__store"
+            type="button"
+            onClick={() => {
+              window.location.href = "/";
+            }}
+          >
+            Back to Store
+          </button>
+
+          {/* REFRESH */}
+
           <button
             className="admin-orders__refresh"
             type="button"
@@ -267,6 +321,8 @@ function AdminOrders() {
               : "Refresh Orders"}
           </button>
 
+          {/* LOGOUT */}
+
           <button
             className="admin-orders__logout"
             type="button"
@@ -277,17 +333,23 @@ function AdminOrders() {
         </div>
       </header>
 
+      {/* SUCCESS MESSAGE */}
+
       {successMessage && (
         <div className="admin-orders__notice admin-orders__notice--success">
           {successMessage}
         </div>
       )}
 
+      {/* ERROR MESSAGE */}
+
       {error && (
         <div className="admin-orders__notice admin-orders__notice--error">
           {error}
         </div>
       )}
+
+      {/* SUMMARY */}
 
       <section className="admin-orders__summary">
         <div className="admin-orders__summary-card">
@@ -313,19 +375,29 @@ function AdminOrders() {
         </div>
       </section>
 
+      {/* LOADING */}
+
       {loading ? (
         <div className="admin-orders__message">
           <span className="admin-orders__loader" />
-          <p>Loading customer orders...</p>
+
+          <p>
+            Loading customer orders...
+          </p>
         </div>
       ) : orders.length === 0 ? (
+        /* EMPTY */
+
         <div className="admin-orders__empty">
           <h2>No orders yet</h2>
+
           <p>
             New customer orders will appear here.
           </p>
         </div>
       ) : (
+        /* ORDER LIST */
+
         <section className="admin-orders__list">
           {orders.map((order) => {
             const currentStatus =
@@ -342,6 +414,8 @@ function AdminOrders() {
                 className="admin-orders__card"
                 key={order.id}
               >
+                {/* ORDER HEADER */}
+
                 <div className="admin-orders__card-header">
                   <div>
                     <span className="admin-orders__order-label">
@@ -361,6 +435,8 @@ function AdminOrders() {
                     )}
                   </span>
                 </div>
+
+                {/* CUSTOMER DETAILS */}
 
                 <div className="admin-orders__details">
                   <p>
@@ -391,6 +467,8 @@ function AdminOrders() {
                   </p>
                 </div>
 
+                {/* ITEMS */}
+
                 <div className="admin-orders__items">
                   <h3>Items Ordered</h3>
 
@@ -418,12 +496,17 @@ function AdminOrders() {
                   )}
                 </div>
 
+                {/* ORDER TOTAL */}
+
                 <div className="admin-orders__total">
                   <span>Order Total</span>
+
                   <strong>
                     {formatCurrency(order.subtotal)}
                   </strong>
                 </div>
+
+                {/* STATUS CONTROL */}
 
                 <div className="admin-orders__status-control">
                   <label
