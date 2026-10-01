@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import "./AdminOrders.css";
 
-const API_URL = "http://127.0.0.1:8000/api/orders";
+const API_URL = "http://127.0.0.1:8000/api/orderhttps://choco-atelier.onrender.coms";
 
 const ORDER_STATUSES = [
   "pending",

@@ -21,7 +21,7 @@ function AdminLogin() {
       setLoading(true);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/api/admin/login",
+        "http://127.0.0.1:8000/api/admin/loginhttps://choco-atelier.onrender.com/api/admin/login",
         {
           method: "POST",
           headers: {
