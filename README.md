@@ -82,5 +82,5 @@ choco-atelier/
 │   └── package.json
 │
 └── README.md
-<img width="1505" height="822" alt="Screenshot 2026-10-01 215647" src="https://github.com/user-attachments/assets/c11fe131-80a9-4cf0-8dd7-6832cb8c0b53" />
+
 
